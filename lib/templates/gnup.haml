@@ -1,0 +1,35 @@
+unset tics
+unset logscale x
+set terminal postscript eps enhanced "GothicBBB-Medium-UniJIS-UTF8-H" 32 color
+set size 2.2, 2.0
+set xlabel "年度" offset 0.0, 0.0 font "GothicBBB-Medium-UniJIS-UTF8-H, 43
+set datafile missing "?"
+set origin 0.0, 0.0
+set lmargin 12.0
+set rmargin 25
+set xtics nomirror font "GothicBBB-Medium-UniJIS-UTF8-H, 37"
+set ytics nomirror font "GothicBBB-Medium-UniJIS-UTF8-H, 37"
+set border 3
+set key outside right center vertical Right samplen 2 spacing 1
+= %!set output "#{@settings.eps_path}"!
+=%!set ylabel "#{@settings.ylabel}" offset #{@settings.is_log ? "-1.0" : "0.0"}, 0.0 font "GothicBBB-Medium-UniJIS-UTF8-H, 34"!
+-#set xrange [#{@xrange.map(&:to_s).join(":")}]" unless @xrange.nil?
+-#set yrange [#{@yrange.map(&:to_s).join(":")}]" unless @yrange.nil?
+-#set xtics 1 if @xrange.last.to_f - @xrange.first.to_f < 7
+
+-#set size square
+-#set datafile separator ",
+-#            style.lc = -1
+-#            style.ps = 0
+-#            style.lw = 0
+-#            ds.notitle
+-#            ds.with = "points"
+-#            ds.ls = style
+plot x with points notitle lw 0 lc -1 ps 0
+-#plot x with points notitle lw 0 lc -1 ps 0, '-' using 1:2 with lines lw 9
+-#0 1 1
+-#1 2 3
+-#2 6 4
+-#4 4 6
+-#5 5 6
+-#e

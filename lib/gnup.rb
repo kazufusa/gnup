@@ -6,11 +6,12 @@ module Gnup
   # gnuplot process runner
   def self.open
     cmd = 'gnuplot --persist'
-    IO.popen(cmd, 'w+') do |io|
+    data = IO.popen(cmd, 'w+') do |io|
       yield io
       io.close_write
-      puts io.read
+      return io.read
     end
+    data
   end
 
   # plot executor
@@ -45,6 +46,9 @@ module Gnup
       end
 
       def gen
+        @settings.xrange = xrange
+        @settings.yrange = yrange
+
         template = File.read(@template)
         haml_engine = Haml::Engine.new(template)
         haml_engine.render(self)
@@ -56,25 +60,58 @@ module Gnup
         dataset
       end
 
+      def xrange
+        x_values = @datasets.map { |dataset| dataset.data[0] }.flatten
+        [x_values.min, x_values.max]
+      end
+
+      def yrange
+        y_values = @datasets.map { |dataset| dataset.data[1] }.flatten
+        errors = @datasets.map { |dataset| dataset.data[2] }.flatten
+        Gnup.calculate_yrange y_values, errors, @settings.is_log
+      end
+
       # plot area settings
       class Settings
-        attr_accessor :is_log, :eps_path, :ylabel
+        attr_accessor :is_log, :eps_path, :ylabel, :xrange, :yrange
         def initialize
           @is_log = false
           @eps_path = ''
           @ylabel = 'tetetete'
+          @xrange = @yrange = []
         end
       end
 
       # plot datasets
       class Dataset
-        attr_accessor :data, :plot, :errorbar, :legend, :line, :title
+        attr_accessor :data, :plot, :errorbar, :legend, :line, :title, :color
         def initialize
           @data = nil
           @plot = @errorbar = @legend = @line = true
           @title = ''
         end
       end
+
     end
+  end
+
+  def self.calculate_yrange(y_values, errors, is_log)
+    y_values = y_values.map.with_index { |v, i| [v.to_f + errors[i].to_f, v.to_f - errors[i].to_f] if v != '?' }.flatten.compact
+    return [] if y_values.empty?
+
+    ymax = y_values.max
+    ymin = y_values.min
+
+    if is_log
+      digit = (Math.log10 ymax).floor + 1
+      ymax = (10**(digit)).to_f
+
+      digit = (Math.log10 ymin).floor
+      ymin = (10**(digit)).to_f
+    else
+      digit = 10**(Math.log10(ymax).floor)
+      ymax = (ymax.to_f / digit.to_f).ceil.to_i * digit
+    end
+    [ymin, ymax]
   end
 end

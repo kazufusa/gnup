@@ -11,25 +11,32 @@ set xtics nomirror font "GothicBBB-Medium-UniJIS-UTF8-H, 37"
 set ytics nomirror font "GothicBBB-Medium-UniJIS-UTF8-H, 37"
 set border 3
 set key outside right center vertical Right samplen 2 spacing 1
+
 = %!set output "#{@settings.eps_path}"!
 =%!set ylabel "#{@settings.ylabel}" offset #{@settings.is_log ? "-1.0" : "0.0"}, 0.0 font "GothicBBB-Medium-UniJIS-UTF8-H, 34"!
--#set xrange [#{@xrange.map(&:to_s).join(":")}]" unless @xrange.nil?
--#set yrange [#{@yrange.map(&:to_s).join(":")}]" unless @yrange.nil?
--#set xtics 1 if @xrange.last.to_f - @xrange.first.to_f < 7
+= "set xrange [#{@settings.xrange.map(&:to_s).join(":")}]"
+= "set yrange [#{@settings.yrange.map(&:to_s).join(":")}]"
+= "set xtics 1" if @settings.xrange.last.to_f - @settings.xrange.first.to_f < 7
 
--#set size square
--#set datafile separator ",
--#            style.lc = -1
--#            style.ps = 0
--#            style.lw = 0
--#            ds.notitle
--#            ds.with = "points"
--#            ds.ls = style
-plot x with points notitle lw 0 lc -1 ps 0
--#plot x with points notitle lw 0 lc -1 ps 0, '-' using 1:2 with lines lw 9
--#0 1 1
--#1 2 3
--#2 6 4
--#4 4 6
--#5 5 6
--#e
+plot x with points notitle lw 0 lc -1 ps 0 \
+- @datasets.each do |dataset|
+  - next unless dataset.plot
+  , '-' using 1:($2) lt 1 lw 7 pt 7 ps 3 \
+  = %!lc rgbcolor "#{dataset.color}" \\! 
+  = %!with #{dataset.line ? 'linespoints' : 'points'} \\!
+  - if dataset.legend
+    = %!title "#{dataset.title}" \\!
+  - else
+    notitle \
+  - if dataset.errorbar
+    , '-' using 1:($2):($3) with yerrorbars notitle lt 1 lw 7 pt 7 ps 3 \
+    = %!lc rgbcolor "#{dataset.color}" \\! 
+
+= "\n"
+- @datasets.each.with_index do |dataset, i|
+  - next unless dataset.plot
+  - data_to_gplot = dataset.data[0].zip(*dataset.data[1..-1]).collect { |v| v.join(" ") }.join("\n") + "\ne"
+  = data_to_gplot
+  - if dataset.errorbar
+    = data_to_gplot
+

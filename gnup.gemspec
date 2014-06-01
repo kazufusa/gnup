@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Gnup::VERSION
   spec.authors       = ["kazufusa"]
   spec.email         = ["kazu.jiyuunosenshi.fusa@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{gnuplot runner with base template}
+  spec.description   = %q{gnuplot runner with base template}
   spec.homepage      = ""
   spec.license       = "MIT"
 

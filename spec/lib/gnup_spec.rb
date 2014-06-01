@@ -51,6 +51,7 @@ describe Gnup do
       Gnup::Plot.new do |gplot|
         gplot.settings do |settings|
           settings.eps_path = 'test1.eps'
+          settings.xtics = %w(111 222 333 444 555444444444)
         end
         datas.each do |data|
           gplot.add_dataset do |dataset|

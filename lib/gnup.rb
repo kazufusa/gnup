@@ -73,10 +73,10 @@ module Gnup
 
       # plot area settings
       class Settings
-        attr_accessor :is_log, :eps_path, :ylabel, :xrange, :yrange
+        attr_accessor :is_log, :eps_path, :ylabel, :xrange, :yrange, :xtics
         def initialize
           @is_log = false
-          @eps_path = ''
+          @eps_path = @xtics = nil
           @ylabel = 'tetetete'
           @xrange = @yrange = []
         end
@@ -91,27 +91,40 @@ module Gnup
           @title = ''
         end
       end
-
     end
   end
 
-  def self.calculate_yrange(y_values, errors, is_log)
-    y_values = y_values.map.with_index { |v, i| [v.to_f + errors[i].to_f, v.to_f - errors[i].to_f] if v != '?' }.flatten.compact
-    return [] if y_values.empty?
+  class <<self
+    def calculate_yrange(y_values, errors, is_log)
+      y_values = y_values.map.with_index { |v, i|
+        [v.to_f + errors[i].to_f, v.to_f - errors[i].to_f] if v != '?'
+      }.flatten.compact
+      return [] if y_values.empty?
 
-    ymax = y_values.max
-    ymin = y_values.min
+      ymax = y_values.max
+      ymin = y_values.min
 
-    if is_log
-      digit = (Math.log10 ymax).floor + 1
-      ymax = (10**(digit)).to_f
-
-      digit = (Math.log10 ymin).floor
-      ymin = (10**(digit)).to_f
-    else
-      digit = 10**(Math.log10(ymax).floor)
-      ymax = (ymax.to_f / digit.to_f).ceil.to_i * digit
+      return [min_in_log(ymin), max_in_log(ymax)] if is_log
+      [min_in_liner(ymin), max_in_liner(ymax)]
     end
-    [ymin, ymax]
+
+    def max_in_log(value)
+      digit = (Math.log10 value).floor + 1
+      (10**(digit)).to_f
+    end
+
+    def min_in_log(value)
+      digit = (Math.log10 value).floor
+      (10**(digit)).to_f
+    end
+
+    def max_in_liner(value)
+      digit = 10**(Math.log10(value).floor)
+      (value.to_f / digit.to_f).ceil.to_i * digit
+    end
+
+    def min_in_liner(value)
+      value
+    end
   end
 end

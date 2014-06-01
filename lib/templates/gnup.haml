@@ -17,6 +17,9 @@ set key outside right center vertical Right samplen 2 spacing 1
 = "set xrange [#{@settings.xrange.map(&:to_s).join(":")}]"
 = "set yrange [#{@settings.yrange.map(&:to_s).join(":")}]"
 = "set xtics 1" if @settings.xrange.last.to_f - @settings.xrange.first.to_f < 7
+- if @settings.xtics
+  = %!set xtics (#{@settings.xtics.map.with_index{|s, n| "'#{s}'" "#{n.succ}"}.join(",")})!
+  set xtics rotate by 270
 
 plot x with points notitle lw 0 lc -1 ps 0 \
 - @datasets.each do |dataset|

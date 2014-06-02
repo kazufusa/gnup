@@ -39,7 +39,7 @@ module Gnup
     # gnuplot command generator
     class Commands
       attr_accessor :settings, :datasets
-      def initialize(template = 'lib/templates/gnup.haml')
+      def initialize(template = Pathname.new(__FILE__).dirname.join('templates/gnup.haml'))
         @datasets = []
         @settings = Settings.new
         @template = template
